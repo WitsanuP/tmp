@@ -1,0 +1,257 @@
+$date
+	Fri Jun 28 15:33:36 2024
+$end
+$version
+	ModelSim Version 2020.1
+$end
+$timescale
+	1ps
+$end
+
+$scope module ResetGen_Module_tb $end
+$var reg 1 ! i_reset_n $end
+$var reg 1 " clk_tb $end
+$var reg 1 # i_pll $end
+$var wire 1 $ o_pllreset $end
+$var wire 1 % o_fg_resetn $end
+
+$scope module dut_resetgen $end
+$var parameter 23 & cExtIgnore $end
+$var wire 1 ' CLK $end
+$var wire 1 ( ExtRESETn $end
+$var wire 1 ) PllLocked $end
+$var wire 1 $ PllRESETn $end
+$var wire 1 % FgRESETn $end
+$var reg 4 * rStartupCnt [3:0] $end
+$var reg 4 + rHoldCnt [3:0] $end
+$var reg 23 , rExtIgnoreCnt [22:0] $end
+$var reg 1 - rPllRESETn $end
+$var reg 1 . rFgRESETn $end
+
+$scope begin u_rStartupCnt $end
+$upscope $end
+
+$scope begin u_rExtIgnoreCnt $end
+$upscope $end
+
+$scope begin u_rHoldCnt $end
+$upscope $end
+
+$scope begin u_rPllRESETn $end
+$upscope $end
+
+$scope begin u_rFgRESETn $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+0!
+0"
+0#
+b0 *
+b0 +
+b0 ,
+x-
+x.
+b10111011100000 &
+x$
+x%
+0)
+0(
+0'
+$end
+#18518
+1"
+1'
+b1 *
+b1 ,
+b1 +
+0-
+0.
+0$
+0%
+#37036
+0"
+0'
+#55554
+1"
+1'
+b10 *
+b10 ,
+b10 +
+#74072
+0"
+0'
+#92590
+1"
+1'
+b11 *
+b11 ,
+b11 +
+#111108
+0"
+0'
+#129626
+1"
+1'
+b100 *
+b100 ,
+b100 +
+#148144
+0"
+0'
+#166662
+1"
+1'
+b101 *
+b101 ,
+b101 +
+#185180
+0"
+0'
+#203698
+1"
+1'
+b110 *
+b110 ,
+b110 +
+#222216
+0"
+0'
+#240734
+1"
+1'
+b111 *
+b111 ,
+b111 +
+#259252
+0"
+0'
+#277770
+1"
+1'
+b1000 *
+b1000 ,
+b1000 +
+#296288
+0"
+0'
+#314806
+1"
+1'
+b1001 *
+b1001 ,
+b1001 +
+#333324
+0"
+0'
+#351842
+1"
+1'
+b1010 *
+b1010 ,
+b1010 +
+1!
+1(
+#370360
+0"
+0'
+#388878
+1"
+1'
+b1011 *
+b1011 ,
+b1011 +
+#407396
+0"
+0'
+#425914
+1"
+1'
+b1100 *
+b1100 ,
+b1100 +
+#444432
+0"
+0'
+#462950
+1"
+1'
+b1101 *
+b1101 ,
+b1101 +
+#481468
+0"
+0'
+#499986
+1"
+1'
+b1110 *
+b1110 ,
+b1110 +
+#518504
+0"
+0'
+#537022
+1"
+1'
+b1111 *
+b1111 ,
+b1111 +
+#555540
+0"
+0'
+#574058
+1"
+1'
+b10000 ,
+b0 +
+1-
+1$
+#592576
+0"
+0'
+#611094
+1"
+1'
+b10001 ,
+#629612
+0"
+0'
+#648130
+1"
+1'
+b10010 ,
+#666648
+0"
+0'
+#685166
+1"
+1'
+b10011 ,
+#703684
+0"
+0'
+#722202
+1"
+1'
+b10100 ,
+1#
+1)
+#740720
+0"
+0'
+#759238
+1"
+1'
+b10101 ,
+1.
+1%
+#777756
+0"
+0'
+#796274
+1"
+1'
