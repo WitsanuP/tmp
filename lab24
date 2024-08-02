@@ -1,0 +1,56 @@
+#include <LedControl.h>
+
+// Define pins
+const int DIN = 12;
+const int CS = 11;
+const int CLK = 10;
+
+
+// Define number of devices (matrices)
+const int numDevices = 1; // Adjust if you have multiple matrices
+
+LedControl lc = LedControl(DIN, CLK, CS, numDevices);
+
+void setup() {
+  lc.shutdown(0, false); // Turn on device 0
+  lc.setIntensity(0, 8); // Set brightness to maximum
+  lc.clearDisplay(0); // Clear the display
+
+}
+
+void loop() {
+  //https://www.riyas.org/2013/12/online-led-matrix-font-generator-with.html
+  
+  //------ O --------------
+  lc.setRow(0,0,B00111100);
+  lc.setRow(0,1,B01000010);
+  lc.setRow(0,2,B10000001);
+  lc.setRow(0,3,B10000001);
+  lc.setRow(0,4,B10000001);
+  lc.setRow(0,5,B10000001);
+  lc.setRow(0,6,B01000010);
+  lc.setRow(0,7,B00111100);
+  delay(500);
+
+  //------ P --------------
+  lc.setRow(0,0,B01111110);
+  lc.setRow(0,1,B01000001);
+  lc.setRow(0,2,B01000001);
+  lc.setRow(0,3,B01111110);
+  lc.setRow(0,4,B01000000);
+  lc.setRow(0,5,B01000000);
+  lc.setRow(0,6,B01000000);
+  lc.setRow(0,7,B01000000);
+  delay(500);
+
+  //------ H --------------
+  lc.setRow(0,0,B01000010);
+  lc.setRow(0,1,B01000010);
+  lc.setRow(0,2,B01000010);
+  lc.setRow(0,3,B01111110);
+  lc.setRow(0,4,B01000010);
+  lc.setRow(0,5,B01000010);
+  lc.setRow(0,6,B01000010);
+  lc.setRow(0,7,B01000010);
+  delay(500);
+}
