@@ -1,180 +1,142 @@
-    library IEEE;
-    use IEEE.STD_LOGIC_1164.all;
-    use IEEE.STD_LOGIC_ARITH.all;
-    use IEEE.STD_LOGIC_UNSIGNED.all;
+module hdmi(Fg_CLK,RESETn,ExtBTN,IntBTN); //! edit
+// -------------------- Port ---------------------
+    input           hdmi_clk; //74.25M Hz 
+    input [23:0]    hdmi_data;
+    input           hdmi_enable;  //1?use data_in: black ;
+    input           hdmi_nReset;
 
-    Entity TxSerial Is
-    Port(
-        RstB        : in    std_logic;
-        Clk         : in    std_logic;
-        
-        TxFfEmpty   : in    std_logic;                          --! if(FIFO have data)? <br> Empty : Have data;
-        TxFfRdData  : in    std_logic_vector(7 downto 0);       --! FIFO --Data-> This 
+    //hdmi
+    output          vout_clk
+    output          vout_hsyn;
+    output          vout_vsyn;
+    output          vout_de; //data enable
+    output [23:0]   vout_data;
+    output          vout_nReset;
 
-        TxFfRdEn    : out   std_logic;                          --! FIFO <- This
-        
-        SerDataOut  : out	std_logic
-    );
-    End Entity TxSerial;    
-
-    Architecture rtl Of TxSerial Is
-    -- constant
-    constant cbuadCnt   : INTEGER := 434;
-
-    -- sinal
-    signal rBuadCnt     : std_logic_vector (9 downto 0);
-    signal rBuadEnd     : std_logic;
-    signal rSerData     : std_logic_vector (9 downto 0);
-    signal rTxFfRdEn    : std_logic_vector (1 downto 0);
-    signal rDataCnt     : std_logic_vector (3 downto 0);
+    //fifo
+    output          fifo_en;
 
 
-        type SerStateType is
-            (
-                stIdle  ,
-                stRdReq , 
-                stWtData,
-                stWtEnd
+// ------------------- Variable ------------------
+parameter H_ACTIVE = 16'd1920;
+parameter H_FP = 16'd88;
+parameter H_SYNC = 16'd44;
+parameter H_BP = 16'd148; 
+parameter V_ACTIVE = 16'd1080;
+parameter V_FP 	= 16'd4;
+parameter V_SYNC  = 16'd5;
+parameter V_BP	= 16'd36;
 
-            );
-    signal rState : SerStateType;
+parameter   H_TOTAL = H_ACTIVE + H_FP + H_SYNC + H_BP;//行总长度
+parameter   V_TOTAL = V_ACTIVE + V_FP + V_SYNC + V_BP;//场总长度
 
-    -- signal rTxFfRdEn : std_logic;
+reg [11:0] counter_vsyn; //begin 0 end 2200, 280 + 1920
+reg stage;
+// -----------------------------------------------
+always @(posedge hdmi_clk or negedge nReset) begin : vout_hsyn
+    if(~nReset)begin
+        stage       <= stage0;
+        vout_hsyn   <= 0;
+        vout_de     <= 0;
+        vout_data   <= 0;
+    end
+    else begin
+        case(state)
+            idle begin
+                vout_hsyn <= 1;
+                if(counter_vsyn == 12'd88) begin //! edit number
+                    stage <= stage1;
+                    vout_hsyn <= 0;
+                end
+            end
 
-    Begin
-        -- output assignment
-        SerDataOut <= rSerData(0);
-        TxFfRdEn   <= rTxFfRdEn(0);
-        
+            state0: begin
+                vout_hsyn <= 1;
+                if(counter_vsyn ==  12'd132) begin //! edit number
+                    stage <= stage1;
+                    vout_hsyn <= 0;
+                end
+            end
+            state1: begin
+                if(counter_vsyn ==  12'd280)begin //! edit number
+                    stage <= state2;
+                end
+            end
+            state2: begin
+                vout_de <= 1;
+                vout_data <= hdmi_data;
+                if(counter_vsyn ==  12'd2200) begin //! edit number 
+                    stage <= state3;
+                    vout_de <= 0;
+                    vout_data <= 24'h0;
+                end
+            end
+            state3: begin
+                if(counter_vsyn == something) begin //! edit number 
+                    stage <= state0;
+                end
+            end
+            default: stage <= idle;
+        endcase
+    end
+    
+end
 
-    ------------------------------------------------------------------------
-        u_rBuadCnt : Process (Clk) Is -- counter down : from constant cbuadBnt to 1
-        Begin
-            if ( rising_edge(Clk) ) then
-                if ( RstB = '0' ) then
-                    rBuadCnt <=  conv_std_logic_vector(cbuadCnt, 10); -- funtion(int, bit) return binary(std_logic_vertor)
-                else
-                    if rState = stWtEnd then
-                        if ( rBuadCnt = 1 )then
-                            rBuadCnt <= conv_std_logic_vector(cbuadCnt, 10);
-                        else
-                            rBuadCnt <= rBuadCnt - 1;
-                        end if;
-                    end if;
-                end if;
-            end if;
-        End Process u_rBuadCnt;
-    ------------------------------------------------------------------------
-        u_rBuadEnd : Process (Clk) Is -- make pulse when rBuadEnd == 1
-        Begin
-            if ( rising_edge(CLK) ) then
-                if ( RstB = '0' ) then
-                    rBuadEnd <= '0';
-                else
-                    if ( rBuadCnt = 1 ) then
-                        rBuadEnd <= '1';
-                    else
-                        rBuadEnd <= '0';
-                    end if;
-                end if;
-            end if;
-        End Process u_rBuadEnd;
-    ------------------------------------------------------------------------
+always @(posedge hdmi_clk or negedge nReset) begin :vout_
+    if(~nReset)begin
 
-    ------------------------------------------------------------------------
-        u_rSerData : Process(Clk) Is
-        Begin
-            if (rising_edge(Clk)) then
-                if(RstB = '0') then
-                    rSerData <= (others => '1');
-                else
-                    if (rTxFfRdEn(1) = '1') then 
-                        rSerData(9)          <= '1';
-                        rSerData(8 downto 1) <= TxFfRdData;
-                        rSerData(0)          <= '0';
-                    else
-                        if (rBuadEnd = '1') then
-                            rSerData <= '1' & rSerData(9 downto 1);
-                        else
-                            rSerData <= rSerData ;
-                        end if;
-                    end if;
-                end if;
-            end if;
-        End Process u_rSerData;
-    ------------------------------------------------------------------------
-        u_rTxFfRdEn : Process (Clk) Is 
-        begin
-            if rising_edge(Clk) then
-                if RstB='0' then
-                    rTxFfRdEn <= "00";
-                else
-                    rTxFfRdEn(1)    <=  rTxFfRdEn(0);
-                    if(rState=stRdReq) then
-                        rTxFfRdEn(0) <= '1';
-                    else
-                        rTxFfRdEn(0) <= '0';
-                    end if;
-                end if;
-            end if;
-        End Process u_rTxFfRdEn;
-    ------------------------------------------------------------------------
-        u_rState : process (Clk) is
-        begin
-            if rising_edge(Clk) then
-                if RstB = '0' then
-                    rState <= stIdle;
-                else
-                    case (rState) is
-                    when stIdle => 
-                        if TxFfEmpty = '0' then
-                            rState <= stRdReq;
-                        else
-                            rState <= stIdle;
-                        end if;
-                    when stRdReq =>
-                        rState <= stWtData;
-                        
-                    when stWtData =>
-                        if rTxFfRdEn(1) = '1' then
-                            rState <= stWtEnd;
-                        else
-                            rState <= stWtData;
-                        end if;
-                    when stWtEnd =>
-                        --if SerEnd = '1' then
-                        if rDataCnt = x"a" then
-                            rState <= stIdle;
-                        else
-                            rState <= stWtEnd;
-                        end if;
-                    end case;
-                end if;
-            end if;
-        end process u_rState;
-        ------------------------------------------------------------------------
-        u_rDataCnt: process(Clk) is 
-        begin
-            if rising_edge(Clk) then
-                if (RstB = '0') then 
-                    rDataCnt <= (others => '0'); 
-                else    
-                    
-                        if (rState = stWtEnd ) then
-                            if (rBuadEnd = '1') then
-                                rDataCnt <= rDataCnt + 1;
-                            else 
-                                rDataCnt <= rDataCnt;
-                            end if;
-                        else 
-                            rDataCnt <= (others => '0');
-                        end if;
-                    
-                end if;
-            end if;
-        end process u_rDataCnt;
+    end
+    else begin
+       
+    end
+end
 
 
-        End Architecture rtl;
+always @(posedge hdmi_clk or negedge nReset) begin :vout_
+    if(~nReset)begin
+
+    end
+    else begin
+       
+    end
+end
+
+// always @(posedge hdmi_clk or negedge nReset) begin :vout_
+//     if(~nReset)begin
+
+//     end
+//     else begin
+       
+//     end
+// end
+///////////////////////////////////////////////////////////////////////////
+    // input Fg_CLK;
+    // input RESETn;
+    // input  ExtBTN;
+    // output reg IntBTN;
+
+    // reg D1;
+    // reg D2;
+    // reg D3;
+    // reg [25:0] counter;
+    // reg enable_counter;
 
 
+    
+// always @(posedge Fg_CLK or negedge RESETn) begin
+//     if(~RESETn)begin
+//             D1 <= 0;
+//             D2 <= 0;
+//             D3 <= 0;
+//     end
+//     else begin
+//         D1 <= ExtBTN;
+//         D2 <= D1;
+//         D3 <= D2;
+//         if(~enable_counter) IntBTN <= (~D2 & D3 &(counter == 0));
+//     end
+// end
+
+
+
+endmodule
