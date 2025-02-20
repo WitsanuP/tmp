@@ -25,8 +25,7 @@ module uart_rx #(parameter CLK_FREQ   = 75_000_000, // System Clock Frequency (H
             bit_count    <= 0;
             shift_reg    <= 0;
             receiving    <= 0;
-            //data_valid   <= 0;
-            data_out     <= 0;
+     
         end else begin
             if (!receiving) begin
                 if (!rx) begin  // Start bit detected
@@ -42,15 +41,21 @@ module uart_rx #(parameter CLK_FREQ   = 75_000_000, // System Clock Frequency (H
                     bit_count    <= bit_count + 1;
                     
                     if (bit_count == 8) begin // Stop bit
-                        data_out    <= shift_reg;
-                        //data_valid  <= 1;
+                     
                         receiving   <= 0;
-                    end //else  data_valid  <= 0;
+                    end 
                 end else begin
                     baud_counter <= baud_counter + 1;
-                    //data_valid   <= 0;
+               
                 end
             end
+        end
+    end
+    always @(posedge clk or negedge nRESET) begin
+        if (~nRESET) begin
+            data_out    <= 0;
+        end else begin
+            data_out    <= shift_reg;
         end
     end
 
@@ -70,7 +75,7 @@ module uart_rx #(parameter CLK_FREQ   = 75_000_000, // System Clock Frequency (H
            else reg_bit_count <= 0;
         end
     end
-    
+
     always @(posedge clk or negedge nRESET) begin
         if (~nRESET) begin
             reg_bit_count2 <= 0;
